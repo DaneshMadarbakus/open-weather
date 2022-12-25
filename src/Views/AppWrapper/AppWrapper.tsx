@@ -1,5 +1,5 @@
 import React from "react";
-import Homepage from "../Homepage/Hompage";
+import { Homepage } from "../Homepage/Hompage";
 
 export const AppWrapper = (): JSX.Element => {
   return (
