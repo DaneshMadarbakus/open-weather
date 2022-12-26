@@ -4,11 +4,16 @@ import { Homepage } from "../Homepage/Hompage";
 export const AppWrapper = (): JSX.Element => {
   return (
     <>
-      {/* <header>This is a header...</header> */}
+      <header>
+        <ul>
+          <li>Home</li>
+          <li>Login</li>
+          <li>Register</li>
+        </ul>
+      </header>
       <main>
         <Homepage />
       </main>
-      {/* <footer>This is a footer...</footer> */}
     </>
   );
 };
