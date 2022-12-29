@@ -29,33 +29,37 @@ export const WeatherApp = (): JSX.Element => {
   const [weatherData, setWeatherData] = useState<weatherData | null>(null);
 
   const callWeatherAPI = async (setLocation: string) => {
-    const locationResponse = await fetch(
-      `http://api.openweathermap.org/geo/1.0/direct?q=${setLocation}&appid=${process.env.WEATHER_API_KEY}`
-    );
+    try {
+      const locationResponse = await fetch(
+        `http://api.openweathermap.org/geo/1.0/direct?q=${setLocation}&appid=${process.env.WEATHER_API_KEY}`
+      );
 
-    const { lat, lon, name, country } = (await locationResponse.json())[0];
+      const { lat, lon, name, country } = (await locationResponse.json())[0];
 
-    const weatherResponse = await fetch(
-      `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${process.env.WEATHER_API_KEY}`
-    );
+      const weatherResponse = await fetch(
+        `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${process.env.WEATHER_API_KEY}`
+      );
 
-    const {
-      sys: { sunrise, sunset },
-      weather: [{ description }],
-      main: { temp },
-    } = await weatherResponse.json();
+      const {
+        sys: { sunrise, sunset },
+        weather: [{ description }],
+        main: { temp },
+      } = await weatherResponse.json();
 
-    const sunriseTime = convertUnixToTime(sunrise);
-    const sunsetTime = convertUnixToTime(sunset);
+      const sunriseTime = convertUnixToTime(sunrise);
+      const sunsetTime = convertUnixToTime(sunset);
 
-    setWeatherData({
-      name,
-      country,
-      sunriseTime,
-      sunsetTime,
-      weatherDescription: description,
-      temp,
-    });
+      setWeatherData({
+        name,
+        country,
+        sunriseTime,
+        sunsetTime,
+        weatherDescription: description,
+        temp,
+      });
+    } catch (err) {
+      err;
+    }
   };
 
   return (

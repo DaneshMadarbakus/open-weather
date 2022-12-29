@@ -1,5 +1,5 @@
 import React from "react";
-import { Homepage } from "../Homepage/Hompage";
+import { Homepage } from "../Homepage";
 import { Link, Route, Routes } from "react-router-dom";
 
 export const AppWrapper = (): JSX.Element => {
