@@ -1,5 +1,7 @@
 import React from "react";
 import { Homepage } from "../Homepage";
+import { Register } from "../Register";
+import { Login } from "../Login";
 import { Link, Route, Routes } from "react-router-dom";
 
 export const AppWrapper = (): JSX.Element => {
@@ -23,8 +25,8 @@ export const AppWrapper = (): JSX.Element => {
       <main>
         <Routes>
           <Route path="/" element={<Homepage />} />
-          {/* <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login />} /> */}
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
         </Routes>
       </main>
     </>
