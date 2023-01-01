@@ -17,6 +17,7 @@ export const Register = (): JSX.Element => {
 
   const registerUser = async (): Promise<void> => {
     const response = await fetch("http://localhost:8001/register", {
+      headers: { "Content-type": "application/json" },
       method: "POST",
       body: JSON.stringify(formData),
     });
@@ -47,6 +48,7 @@ export const Register = (): JSX.Element => {
         <InputText
           label="Password:"
           name="password"
+          password={true}
           changeHandler={handleUpdateForm}
         />
         <button type="submit">Register</button>

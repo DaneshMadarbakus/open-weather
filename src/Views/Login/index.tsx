@@ -15,6 +15,7 @@ export const Login = (): JSX.Element => {
 
   const LoginUser = async (): Promise<void> => {
     const response = await fetch("http://localhost:8001/login", {
+      headers: { "Content-type": "application/json" },
       method: "POST",
       body: JSON.stringify(formData),
     });
@@ -40,6 +41,7 @@ export const Login = (): JSX.Element => {
         <InputText
           label="Password:"
           name="password"
+          password={true}
           changeHandler={handleUpdateForm}
         />
         <button type="submit">Login</button>
