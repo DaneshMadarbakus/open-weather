@@ -9,6 +9,19 @@ type weatherData = {
   temp: number;
 };
 
+type locationResponse = {
+  lat: number;
+  lon: number;
+  name: string;
+  country: string;
+};
+
+type weatherResponse = {
+  sys: { sunrise: number; sunset: number };
+  weather: [{ description: string }];
+  main: { temp: number };
+};
+
 const convertUnixToTime = (unixTime: number): string => {
   const date = new Date(unixTime * 1000);
 
@@ -34,7 +47,9 @@ export const WeatherApp = (): JSX.Element => {
         `http://api.openweathermap.org/geo/1.0/direct?q=${setLocation}&appid=${process.env.WEATHER_API_KEY}`
       );
 
-      const { lat, lon, name, country } = (await locationResponse.json())[0];
+      const { lat, lon, name, country }: locationResponse = (
+        await locationResponse.json()
+      )[0];
 
       const weatherResponse = await fetch(
         `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${process.env.WEATHER_API_KEY}`
@@ -44,7 +59,7 @@ export const WeatherApp = (): JSX.Element => {
         sys: { sunrise, sunset },
         weather: [{ description }],
         main: { temp },
-      } = await weatherResponse.json();
+      }: weatherResponse = await weatherResponse.json();
 
       const sunriseTime = convertUnixToTime(sunrise);
       const sunsetTime = convertUnixToTime(sunset);
