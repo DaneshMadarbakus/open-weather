@@ -1,85 +1,61 @@
-require("dotenv").config;
-
 import { Pool } from "pg";
 import bcrypt from "bcrypt";
+import { Request, Response } from "express";
 
 const pool = new Pool({
   user: process.env.USER,
   host: process.env.HOST,
   database: process.env.DATABASE,
   password: process.env.PASSWORD,
-  port: process.env.PORT,
+  port: process.env.PORT as unknown as number,
 });
 
-export const getUsers = (request, response) => {
-  pool.query("SELECT * FROM users ORDER BY id ASC", (error, results) => {
-    if (error) {
-      throw error;
+export const getUsers = (req: Request, res: Response) => {
+  pool.query("SELECT * FROM users ORDER BY id ASC", (err, results) => {
+    if (err) {
+      throw err;
     }
-    response.status(200).json(results.rows);
+    res.send({ status: 200, results: results.rows });
   });
 };
 
-// export const getUserById = (request, response) => {
-//   const id = parseInt(request.params.id);
+// next();
+// bcrypt.compare(req.body.password, passwordHash)
 
-//   pool.query("SELECT * FROM users WHERE id = $1", [id], (error, results) => {
-//     if (error) {
-//       throw error;
+// export const getUserById = (req, res) => {
+//   const id = parseInt(req.params.id);
+
+//   pool.query("SELECT * FROM users WHERE id = $1", [id], (err, results) => {
+//     if (err) {
+//       throw err;
 //     }
-//     response.status(200).json(results.rows);
+//     res.status(200).json(results.rows);
 //   });
 // };
 
-export const createUser = async (request, response) => {
-  const { username, email, password } = request.body;
-
-  try {
-    const passwordHash = await bcrypt.hash(password, 10);
-    console.log("Danesh password: ", passwordHash, request.body.hash);
-
-    const user = { username, email, passwordHash };
-
-    pool.query(
-      "INSERT INTO users (name, email, passwordHash) VALUES (username, email, passwordHash)",
-      [username, email, passwordHash],
-      (error, results) => {
-        if (error) {
-          throw error;
-        }
-        response.status(201).send(`User added with ID: ${results.insertId}`);
-      }
-    );
-  } catch {
-    response.sendStatus(500);
-  }
-
-  // bcrypt.compare(request.body.password, passwordHash)
-};
-
-// const updateUser = (request, response) => {
-//   const id = parseInt(request.params.id);
-//   const { name, email } = request.body;
+// const updateUser = (req, res) => {
+//   const id = parseInt(req.params.id);
+//   const { name, email } = req.body;
 
 //   pool.query(
 //     "UPDATE users SET name = $1, email = $2 WHERE id = $3",
 //     [name, email, id],
-//     (error, results) => {
-//       if (error) {
-//         throw error;
+//     (err, results) => {
+//       if (err) {
+//         throw err;
 //       }
-//       response.status(200).send(`User modified with ID: ${id}`);
+//       res.status(200).send(`User modified with ID: ${id}`);
 //     }
 //   );
 // };
 
-// export const deleteUser = (request, response) => {
-//   const id = parseInt(request.params.id);
+// export const deleteUser = (req, res) => {
+//   const id = parseInt(req.params.id);
 
-//   pool.query("DELETE FROM users WHERE id = $1", [id], (error, results) => {
-//     if (error) {
-//       throw error;
+//   pool.query("DELETE FROM users WHERE id = $1", [id], (err, results) => {
+//     if (err) {
+//       throw err;
 //     }
-//     response.status(200).send(`User deleted with ID: ${id}`);
+//     res.status(200).send(`User deleted with ID: ${id}`);
 //   });
 // };

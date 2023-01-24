@@ -22,7 +22,8 @@ export const Register = (): JSX.Element => {
       body: JSON.stringify(formData),
     });
 
-    console.log("Danesh response token: ", response);
+    const responseJSON = await response.json();
+    console.log("Danesh response token: ", responseJSON);
   };
 
   return (
