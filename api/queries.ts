@@ -1,5 +1,4 @@
 import { Pool } from "pg";
-import bcrypt from "bcrypt";
 import { Request, Response } from "express";
 
 const pool = new Pool({

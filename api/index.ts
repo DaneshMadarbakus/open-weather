@@ -34,17 +34,11 @@ function authenticateToken(req: Request, res: Response, next: NextFunction) {
   });
 }
 
-function generateAccessToken(user: object) {
-  return jwt.sign(user, accessTokenSecret, {
-    expiresIn: "1d",
-  });
-}
+// app.get("/test-data", authenticateToken, (req: Request, res: Response) => {
+//   console.log("Danesh /login", req.body);
 
-app.get("/test-data", authenticateToken, (req: Request, res: Response) => {
-  console.log("Danesh /login", req.body);
-
-  // res.json({ message: `successful request for ${req.user.name}` });
-});
+//   // res.json({ message: `successful request for ${req.user.name}` });
+// });
 
 let refreshTokens: any[] = []; //this should be stored ideally in a database or redis cache
 
@@ -58,11 +52,6 @@ app.post("/token", (req: Request, res: Response) => {
   //   const accessToken = generateAccessToken({ name: user.name });
   //   res.json({ accessToken });
   // });
-});
-
-app.delete("/logout", (req: Request, res: Response) => {
-  refreshTokens = refreshTokens.filter((token) => token !== req.body.token);
-  res.sendStatus(204);
 });
 
 app.listen(port, () => {

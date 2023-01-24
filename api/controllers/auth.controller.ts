@@ -80,3 +80,8 @@ export const loginUser = async (req: Request, res: Response) => {
     res.sendStatus(500);
   }
 };
+
+export const logoutUser = async (req: Request, res: Response) => {
+  // refreshTokens = refreshTokens.filter((token) => token !== req.body.token);
+  res.sendStatus(204);
+};
