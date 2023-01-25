@@ -23,6 +23,7 @@ export const Register = (): JSX.Element => {
     });
 
     const responseJSON = await response.json();
+
     console.log("Danesh response token: ", responseJSON);
   };
 

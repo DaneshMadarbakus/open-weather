@@ -23,7 +23,7 @@ function generateAccessToken(user: User) {
   });
 }
 
-export const createUser = async (req: Request, res: Response) => {
+const createUser = async (req: Request, res: Response) => {
   const { username, email, password } = req.body;
 
   try {
@@ -42,6 +42,7 @@ export const createUser = async (req: Request, res: Response) => {
         res.send({
           status: 201,
           messsage: `User added with ID: ${results}`,
+          user: { username },
           accessToken,
         });
       }
@@ -51,16 +52,14 @@ export const createUser = async (req: Request, res: Response) => {
   }
 };
 
-export const loginUser = async (req: Request, res: Response) => {
+const loginUser = async (req: Request, res: Response) => {
   console.log("Danesh /login", req.body);
   const { username, password } = req.body;
 
   try {
-    console.log("DNAESH HELLO");
     const dbResponse = await pool.query(
       `SELECT passwordHash FROM users WHERE username = '${username}'`
     );
-
     const match = bcrypt.compare(password, dbResponse.rows[0].passwordhash);
 
     if (!match) {
@@ -73,6 +72,7 @@ export const loginUser = async (req: Request, res: Response) => {
 
     res.send({
       status: 201,
+      user: { username },
       accessToken,
       // refreshToken
     });
@@ -81,7 +81,9 @@ export const loginUser = async (req: Request, res: Response) => {
   }
 };
 
-export const logoutUser = async (req: Request, res: Response) => {
+const logoutUser = async (req: Request, res: Response) => {
   // refreshTokens = refreshTokens.filter((token) => token !== req.body.token);
   res.sendStatus(204);
 };
+
+export default { createUser, loginUser, logoutUser };
