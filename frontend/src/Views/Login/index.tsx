@@ -6,6 +6,13 @@ type FormData = {
   password?: string;
 };
 
+type LoginResponseJSON = {
+  status: number;
+  user: { username: string };
+  accessToken: string;
+  refreshToken: string;
+};
+
 export const Login = (): JSX.Element => {
   const [formData, setFormData] = useState<FormData>({});
 
@@ -20,7 +27,10 @@ export const Login = (): JSX.Element => {
       body: JSON.stringify(formData),
     });
 
-    console.log("Danesh response token: ", response);
+    const responseJSON: LoginResponseJSON = await response.json();
+
+    localStorage.setItem("authorization-token", responseJSON.accessToken);
+    localStorage.setItem("refresh-token", responseJSON.refreshToken);
   };
 
   return (

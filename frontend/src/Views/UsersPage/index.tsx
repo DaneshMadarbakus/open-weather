@@ -1,19 +1,31 @@
 import React, { useState } from "react";
+import { useAuthToken } from "../../Hooks/useAuthToken";
 
-export const Users = (): JSX.Element => {
-  const [users, setUsers] = useState([]);
-  // const registerUser = async (): Promise<void> => {
-  //   const response = await fetch("http://localhost:8001/register", {
-  //     headers: { "Content-type": "application/json" },
-  //     method: "POST",
-  //     body: JSON.stringify(formData),
-  //   });
+type UsersResponseJSON = {
+  status: number;
+  results: UserResults;
+};
 
-  //   const responseJSON = await response.json();
-  //   console.log("Danesh response token: ", responseJSON);
-  // };
+type UserResults = { username: string }[];
 
-  const requestUsers = async (): Promise<void> => {};
+export const UsersPage = (): JSX.Element => {
+  const [users, setUsers] = useState<UserResults>([]);
+  const { isAuthorized, token } = useAuthToken();
+
+  const requestUsers = async (): Promise<void> => {
+    try {
+      if (isAuthorized && token) {
+        const response = await fetch("http://localhost:8001/users", {
+          headers: { "Content-type": "application/json", authorization: token },
+        });
+        const responseJSON: UsersResponseJSON = await response.json();
+
+        setUsers(responseJSON.results);
+      }
+    } catch (err) {
+      console.log("UsersPage Error: ", err);
+    }
+  };
 
   return (
     <>
@@ -25,6 +37,13 @@ export const Users = (): JSX.Element => {
       >
         See all users
       </button>
+      {users.length > 0 && (
+        <ul>
+          {users.map((user) => {
+            return <li key={user.username}>{user.username}</li>;
+          })}
+        </ul>
+      )}
     </>
   );
 };

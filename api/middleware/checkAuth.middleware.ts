@@ -9,10 +9,10 @@ export function authenticateToken(
   next: NextFunction
 ) {
   const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-  if (token === null) return res.sendStatus(401);
 
-  jwt.verify(token || "", accessTokenSecret, (err, user) => {
+  if (!authHeader) return res.sendStatus(401);
+
+  jwt.verify(authHeader || "", accessTokenSecret, (err, user) => {
     if (err) return res.sendStatus(403);
     // req.user = user;
     next();

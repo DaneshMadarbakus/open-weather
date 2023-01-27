@@ -8,6 +8,14 @@ type FormData = {
   password?: string;
 };
 
+type RegisterResponseJSON = {
+  status: number;
+  messsage: string;
+  user: { username: string };
+  accessToken: string;
+  refreshToken: string;
+};
+
 export const Register = (): JSX.Element => {
   const [formData, setFormData] = useState<FormData>({});
 
@@ -22,9 +30,10 @@ export const Register = (): JSX.Element => {
       body: JSON.stringify(formData),
     });
 
-    const responseJSON = await response.json();
+    const responseJSON: RegisterResponseJSON = await response.json();
 
-    console.log("Danesh response token: ", responseJSON);
+    localStorage.setItem("authorization-token", responseJSON.accessToken);
+    localStorage.setItem("refresh-token", responseJSON.refreshToken);
   };
 
   return (

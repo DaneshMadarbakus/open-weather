@@ -10,7 +10,7 @@ const pool = new Pool({
 });
 
 const getUsers = (req: Request, res: Response) => {
-  pool.query("SELECT * FROM users ORDER BY id ASC", (err, results) => {
+  pool.query("SELECT username FROM users ORDER BY id ASC", (err, results) => {
     if (err) {
       throw err;
     }

@@ -11,14 +11,17 @@ const pool = new Pool({
   port: process.env.PORT as unknown as number,
 });
 
-const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET || "";
+const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET as string;
+const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET as string;
 
 type User = {
   username: string;
 };
 
-function generateAccessToken(user: User) {
-  return jwt.sign(user, accessTokenSecret, {
+let refreshTokensStorage: string[] = []; //this should be stored ideally in a database or redis cache
+
+function generateAccessToken(user: User, secret: string) {
+  return jwt.sign(user, secret, {
     expiresIn: "1d",
   });
 }
@@ -37,13 +40,23 @@ const createUser = async (req: Request, res: Response) => {
           throw err;
         }
 
-        const accessToken = generateAccessToken({ username });
+        const accessToken = generateAccessToken(
+          { username },
+          accessTokenSecret
+        );
+        const refreshToken = generateAccessToken(
+          { username },
+          refreshTokenSecret
+        );
+
+        refreshTokensStorage.push(refreshToken);
 
         res.send({
           status: 201,
           messsage: `User added with ID: ${results}`,
           user: { username },
           accessToken,
+          refreshToken,
         });
       }
     );
@@ -53,7 +66,6 @@ const createUser = async (req: Request, res: Response) => {
 };
 
 const loginUser = async (req: Request, res: Response) => {
-  console.log("Danesh /login", req.body);
   const { username, password } = req.body;
 
   try {
@@ -67,15 +79,35 @@ const loginUser = async (req: Request, res: Response) => {
       return;
     }
 
-    const accessToken = generateAccessToken({ username });
-    // const refreshToken = jwt.sign(user, refreshTokenSecret);
+    const accessToken = generateAccessToken({ username }, accessTokenSecret);
+    const refreshToken = generateAccessToken({ username }, refreshTokenSecret);
+
+    refreshTokensStorage.push(refreshToken);
 
     res.send({
       status: 201,
       user: { username },
       accessToken,
-      // refreshToken
+      refreshToken,
     });
+  } catch {
+    res.sendStatus(500);
+  }
+};
+
+const refreshToken = async (req: Request, res: Response) => {
+  const { username, token } = req.body;
+
+  try {
+    if (refreshToken == null) return res.sendStatus(401);
+    // if (!refreshTokensStorage.includes(refreshToken))
+    //   return res.sendStatus(403);
+
+    // jwt.verify(refreshToken, refreshTokenSecret, (err, user) => {
+    //   if (err) return res.sendStatus(403);
+    //   const accessToken = generateAccessToken({ username });
+    //   res.json({ accessToken });
+    // });
   } catch {
     res.sendStatus(500);
   }
@@ -86,4 +118,4 @@ const logoutUser = async (req: Request, res: Response) => {
   res.sendStatus(204);
 };
 
-export default { createUser, loginUser, logoutUser };
+export default { createUser, loginUser, logoutUser, refreshToken };
