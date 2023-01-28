@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { InputText } from "../../Components/InputText";
+import { UserContext } from "../../Contexts/useUserContext";
 
 type FormData = {
   username?: string;
@@ -15,6 +16,7 @@ type LoginResponseJSON = {
 
 export const Login = (): JSX.Element => {
   const [formData, setFormData] = useState<FormData>({});
+  const { setUsername } = useContext(UserContext);
 
   const handleUpdateForm = (name: string, value: string): void => {
     setFormData({ ...formData, [name]: value });
@@ -28,6 +30,8 @@ export const Login = (): JSX.Element => {
     });
 
     const responseJSON: LoginResponseJSON = await response.json();
+
+    setUsername(responseJSON.user.username);
 
     localStorage.setItem("authorization-token", responseJSON.accessToken);
     localStorage.setItem("refresh-token", responseJSON.refreshToken);

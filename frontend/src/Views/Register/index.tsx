@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { InputText } from "../../Components/InputText";
+import { UserContext } from "../../Contexts/useUserContext";
+
 import "./index.css";
 
 type FormData = {
@@ -18,6 +20,7 @@ type RegisterResponseJSON = {
 
 export const Register = (): JSX.Element => {
   const [formData, setFormData] = useState<FormData>({});
+  const { setUsername } = useContext(UserContext);
 
   const handleUpdateForm = (name: string, value: string): void => {
     setFormData({ ...formData, [name]: value });
@@ -31,6 +34,8 @@ export const Register = (): JSX.Element => {
     });
 
     const responseJSON: RegisterResponseJSON = await response.json();
+
+    setUsername(responseJSON.user.username);
 
     localStorage.setItem("authorization-token", responseJSON.accessToken);
     localStorage.setItem("refresh-token", responseJSON.refreshToken);

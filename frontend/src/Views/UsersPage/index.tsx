@@ -29,7 +29,7 @@ export const UsersPage = (): JSX.Element => {
 
   return (
     <>
-      <h1>USERS</h1>
+      <h1>Users</h1>
       <button
         onClick={() => {
           requestUsers();
