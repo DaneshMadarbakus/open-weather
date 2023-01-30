@@ -13,7 +13,7 @@ export function authenticateToken(
   if (!authHeader) return res.sendStatus(401);
 
   jwt.verify(authHeader || "", accessTokenSecret, (err, user) => {
-    if (err) return res.sendStatus(403);
+    if (err) return res.send({ status: 403 });
     // req.user = user;
     next();
   });

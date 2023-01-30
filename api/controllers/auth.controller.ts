@@ -2,6 +2,7 @@ import { Pool } from "pg";
 import bcrypt from "bcrypt";
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import * as Redis from "redis";
 
 const pool = new Pool({
   user: process.env.USER,
@@ -11,6 +12,13 @@ const pool = new Pool({
   port: process.env.PORT as unknown as number,
 });
 
+const redisClient = async () => {
+  const client = Redis.createClient();
+  await client.connect();
+
+  return client;
+};
+
 const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET as string;
 const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET as string;
 
@@ -18,12 +26,31 @@ type User = {
   username: string;
 };
 
-let refreshTokensStorage: string[] = []; //this should be stored ideally in a database or redis cache
+async function generateAccessToken(
+  user: User,
+  secret: string,
+  type: "refresh" | "access"
+) {
+  const redisClientInstance = await redisClient();
+  let expirationTime = "24h";
 
-function generateAccessToken(user: User, secret: string) {
-  return jwt.sign(user, secret, {
-    expiresIn: "1d",
+  if (type === "refresh") {
+    expirationTime = "48h";
+  }
+
+  const jwtToken = jwt.sign(user, secret, {
+    expiresIn: expirationTime,
   });
+
+  if (type === "refresh") {
+    redisClientInstance.setEx(
+      `weatherAppRefreshToken:${user.username}`,
+      3600,
+      jwtToken
+    );
+  }
+
+  return jwtToken;
 }
 
 const createUser = async (req: Request, res: Response) => {
@@ -35,21 +62,21 @@ const createUser = async (req: Request, res: Response) => {
     pool.query(
       "INSERT INTO users (username, email, passwordHash) VALUES ($1, $2, $3)",
       [username, email, passwordHash],
-      (err, results) => {
+      async (err, results) => {
         if (err) {
           throw err;
         }
 
-        const accessToken = generateAccessToken(
+        const accessToken = await generateAccessToken(
           { username },
-          accessTokenSecret
+          accessTokenSecret,
+          "access"
         );
-        const refreshToken = generateAccessToken(
+        const refreshToken = await generateAccessToken(
           { username },
-          refreshTokenSecret
+          refreshTokenSecret,
+          "refresh"
         );
-
-        refreshTokensStorage.push(refreshToken);
 
         res.send({
           status: 201,
@@ -79,10 +106,17 @@ const loginUser = async (req: Request, res: Response) => {
       return;
     }
 
-    const accessToken = generateAccessToken({ username }, accessTokenSecret);
-    const refreshToken = generateAccessToken({ username }, refreshTokenSecret);
+    const accessToken = await generateAccessToken(
+      { username },
+      accessTokenSecret,
+      "access"
+    );
 
-    refreshTokensStorage.push(refreshToken);
+    const refreshToken = await generateAccessToken(
+      { username },
+      refreshTokenSecret,
+      "refresh"
+    );
 
     res.send({
       status: 201,
@@ -97,25 +131,40 @@ const loginUser = async (req: Request, res: Response) => {
 
 const refreshToken = async (req: Request, res: Response) => {
   const { username, token } = req.body;
+  const redisClientInstance = await redisClient();
 
   try {
-    if (refreshToken == null) return res.sendStatus(401);
-    // if (!refreshTokensStorage.includes(refreshToken))
-    //   return res.sendStatus(403);
+    const userRefreshToken = await redisClientInstance.get(
+      `weatherAppRefreshToken:${username}`
+    );
 
-    // jwt.verify(refreshToken, refreshTokenSecret, (err, user) => {
-    //   if (err) return res.sendStatus(403);
-    //   const accessToken = generateAccessToken({ username });
-    //   res.json({ accessToken });
-    // });
+    if (token == null) return res.sendStatus(401);
+    if (!userRefreshToken) return res.sendStatus(403);
+
+    jwt.verify(token, refreshTokenSecret, async (err: any, user: any) => {
+      if (err || user.username !== username) return res.sendStatus(403);
+
+      const accessToken = await generateAccessToken(
+        { username },
+        accessTokenSecret,
+        "access"
+      );
+
+      res.send({ status: 201, accessToken });
+    });
   } catch {
     res.sendStatus(500);
   }
 };
 
 const logoutUser = async (req: Request, res: Response) => {
-  // refreshTokens = refreshTokens.filter((token) => token !== req.body.token);
-  res.sendStatus(204);
+  const { username } = req.body;
+
+  const redisClientInstance = await redisClient();
+
+  redisClientInstance.del(`weatherAppRefreshToken:${username}`);
+
+  res.send({ status: 204 });
 };
 
 export default { createUser, loginUser, logoutUser, refreshToken };
