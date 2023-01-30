@@ -10,7 +10,9 @@ import { jwtTokenDecoded } from "../global.types";
 
 type UserContextType = {
   username: string | null;
-  setUsername: Dispatch<SetStateAction<string>> | ((arg0: string) => void);
+  setUsername:
+    | Dispatch<SetStateAction<string | null>>
+    | ((arg0: string | null) => void);
 };
 
 type Props = {
@@ -41,7 +43,8 @@ export const UserContextProvider = ({ children }: Props): JSX.Element => {
     <UserContext.Provider
       value={{
         username: username || defaultUsername,
-        setUsername: (usernameString: string) => setUsername(usernameString),
+        setUsername: (usernameString: string | null) =>
+          setUsername(usernameString),
       }}
     >
       {children}

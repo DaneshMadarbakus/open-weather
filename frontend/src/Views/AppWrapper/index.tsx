@@ -6,6 +6,7 @@ import { Login } from "../Login";
 import { UsersPage } from "../UsersPage";
 import { Header } from "../../Components/Header";
 import { Route, Routes } from "react-router-dom";
+import { Logout } from "../Logout";
 
 export const AppWrapper = (): JSX.Element => {
   return (
@@ -16,6 +17,7 @@ export const AppWrapper = (): JSX.Element => {
           <Route path="/" element={<Homepage />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/logout" element={<Logout />} />
           <Route path="/users" element={<UsersPage />} />
         </Routes>
       </main>

@@ -1,5 +1,8 @@
-import { useEffect, useState } from "react";
+//NEED TO COMPLETELY REWRITE THIS - NOT HAPPY
+
+import { useContext, useEffect, useState } from "react";
 import { useJwt } from "react-jwt";
+import { UserContext } from "../Contexts/useUserContext";
 
 type UseAuthTokenReturn = {
   isAuthorized: boolean;
@@ -7,54 +10,54 @@ type UseAuthTokenReturn = {
 };
 
 export function useAuthToken(): UseAuthTokenReturn {
-  console.log("Danesh hook 0");
   const [token, setToken] = useState<string | null>(
     localStorage.getItem("authorization-token")
   );
   const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
+  const { username } = useContext(UserContext);
+  const refreshToken = localStorage.getItem("refresh-token");
 
   const jwt = token ? useJwt(token) : null;
 
-  console.log("Danesh hook 1");
+  console.log("Danesh useAuthToken 1", jwt);
 
   useEffect(() => {
-    console.log("Danesh hook useEffect 0 ");
+    console.log("Danesh useEffect 0");
     async function fetchRefreshedAccessToken(rToken: string) {
-      console.log("Danesh hook useEffect 6 ");
       try {
         const response = await fetch("http://localhost:8001/refresh-token", {
           headers: {
             "Content-type": "application/json",
-            // username: username,
-            token: rToken,
           },
+          body: JSON.stringify({ username: username, token: rToken }),
           method: "POST",
         });
-        console.log("HEREEE1: ", response);
-        const responseJSON: { accessToken: string } = await response.json();
-        console.log("HEREEE2: ", responseJSON);
-        setToken(responseJSON.accessToken);
+
+        const { accessToken } = await response.json();
+
+        // localStorage.setItem("authorization-token", accessToken);
+        setToken(accessToken);
+        setIsAuthorized(true);
+        console.log("Danesh useEffect final");
       } catch (err) {
         console.log("fetchRefreshedAccessToken error: ", err);
       }
     }
-    console.log("Danesh hook useEffect 1 ");
-    if (token && jwt && !jwt.isExpired) {
+
+    if (jwt && jwt.decodedToken && !jwt.isExpired) {
+      console.log("Danesh useEffect 1");
+      // setToken(token);
       setIsAuthorized(true);
-    }
-    console.log("Danesh hook useEffect 2 ");
-    const refreshToken = localStorage.getItem("refresh-token");
-    console.log("Danesh hook useEffect 3 ");
-    if (!refreshToken) {
-      console.log("Danesh hook useEffect 4 ");
+    } else if (!refreshToken) {
+      console.log("Danesh useEffect 2");
       setIsAuthorized(false);
     } else {
-      console.log("Danesh hook useEffect 5 ");
+      console.log("Danesh useEffect 3");
       fetchRefreshedAccessToken(refreshToken);
     }
   }, []);
 
-  console.log("Danesh hook 2");
+  console.log("useAuthToken 2");
 
   return { isAuthorized, token };
 }
