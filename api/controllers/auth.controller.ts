@@ -6,7 +6,7 @@ import * as Redis from "redis";
 
 const pool = new Pool({
   user: process.env.USER,
-  host: process.env.HOST,
+  host: process.env.WEB_HOST || process.env.HOST,
   database: process.env.DATABASE,
   password: process.env.PASSWORD,
   port: process.env.PORT as unknown as number,
@@ -96,28 +96,30 @@ const loginUser = async (req: Request, res: Response) => {
   const { username, password } = req.body;
 
   try {
+    console.log("Danesh 1");
     const dbResponse = await pool.query(
       `SELECT passwordHash FROM users WHERE username = '${username}'`
     );
+    console.log("Danesh 2");
     const match = bcrypt.compare(password, dbResponse.rows[0].passwordhash);
-
+    console.log("Danesh 3");
     if (!match) {
       res.send({ status: 500, message: "bad password" });
       return;
     }
-
+    console.log("Danesh 4");
     const accessToken = await generateAccessToken(
       { username },
       accessTokenSecret,
       "access"
     );
-
+    console.log("Danesh 5");
     const refreshToken = await generateAccessToken(
       { username },
       refreshTokenSecret,
       "refresh"
     );
-
+    console.log("Danesh 6");
     res.send({
       status: 201,
       user: { username },

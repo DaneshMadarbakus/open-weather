@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 
 const pool = new Pool({
   user: process.env.USER,
-  host: process.env.HOST,
+  host: process.env.WEB_HOST || process.env.HOST,
   database: process.env.DATABASE,
   password: process.env.PASSWORD,
   port: process.env.PORT as unknown as number,

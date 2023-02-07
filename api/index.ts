@@ -7,7 +7,7 @@ import cors from "cors";
 import { authRoutes, userRoutes } from "./routes";
 
 const app: Application = express();
-const port = 8001;
+const port = process.env.WEB_PORT || 8001;
 
 app.use(cors());
 app.use(bodyParser.json());

@@ -1,0 +1,32 @@
+version: '3.7'
+services:
+  db: 
+    image: postgres
+    environment:
+      POSTGRES_USER: me
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: weatherdb
+    volumes:
+      - ./db-data:/var/lib/postgresql/data
+    networks:
+      - webnet
+    ports:
+      - '5432:5432'
+  web:
+    build: .
+    ports:
+      - "8001:8080"
+    networks:
+      - webnet
+    depends_on:
+      - db
+    # command: ["./wait-for-it.sh", "db:5432", "--", "npm", "start"]
+  redis:
+    image: redis
+    networks:
+      - webnet
+
+volumes: 
+  db-data:
+networks:
+  webnet:
